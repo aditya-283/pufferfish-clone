@@ -229,12 +229,12 @@ for epoch in range(start_epoch, start_epoch+20):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
     #            param_index, param_name, param.size()))
-    if epoch in range(0):
+    if epoch in range(5):
         print("!!!!! Warm-up epoch: {}".format(epoch))
         train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
         test(epoch, model=net_vanilla)
         scheduler_vanilla.step()
-    elif epoch == 0:
+    elif epoch == 5:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
             low_rank_model=net, rank_factor=4)

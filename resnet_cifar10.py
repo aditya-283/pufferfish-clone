@@ -91,7 +91,7 @@ class LowrankBasicBlock(nn.Module):
                                 padding=1, 
                                 bias=False)
         self.conv2_v = conv1x1(int(planes/CONST_RANK_DENOMINATOR), planes)
-        self.conv2_res = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+        self.conv2_res = nn.Conv2d(planes, planes, kernel_size=3, stride=1, padding=1, bias=False)
         self.bn2 = nn.BatchNorm2d(planes)
 
         self.shortcut = nn.Sequential()
