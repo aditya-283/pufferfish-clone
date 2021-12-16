@@ -86,19 +86,38 @@ if args.resume:
     best_acc = checkpoint['acc']
     start_epoch = checkpoint['epoch']
 
+
+def one_cycle(hp_max=0.1, epochs=10, hp_init=0.0, hp_final=0.005, extra=5):
+    def f(progress):
+        if progress < epochs / 2:
+            return 2 * hp_max * (1 - (epochs - progress) / epochs)
+        elif progress <= epochs:
+            return hp_final + 2 * (hp_max - hp_final) * (epochs - progress) / epochs
+        elif progress <= epochs + extra:
+            return hp_final * (extra - (progress - epochs)) / extra
+        else:
+            return hp_final / 10
+    
+    return f
+
 criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(net.parameters(), lr=args.lr,
 #                       momentum=0.9, weight_decay=1e-4)
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
 #                         milestones=[150, 250], gamma=0.1)
 
-optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=args.lr,
-                      momentum=0.9, weight_decay=1e-4)
-scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
-                        milestones=[150, 250], gamma=0.1)
+# optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=args.lr,
+#                       momentum=0.9, weight_decay=1e-4)
+
+optimizer_vanilla = torch.optim.SGD(model.parameters(), lr=one_cycle(hp_max=0.1, epochs=30), momentum=0.9, weight_decay=5e-4, nesterov=True)
+
+# scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
+#                         milestones=[150, 250], gamma=0.1)
 
 
 #def get_approx(u_weight, v_weight_t):
+
+
 
 
 
@@ -109,10 +128,10 @@ def decompose_weights(model, low_rank_model, rank_factor):
     for item_index, (param_name, param) in enumerate(model.state_dict().items()):
         if len(param.size()) == 4 and item_index not in range(0, 1) and 'shortcut' not in param_name:
             # resize --> svd --> two layer
-            print(param.size())
+            # print(param.size())
             param_reshaped = param.view(param.size()[0], -1)
             rank = min(param_reshaped.size()[0], param_reshaped.size()[1])
-            print(rank)
+            # print(rank)
             u, s, v = torch.svd(param_reshaped)
 
             sliced_rank = int(rank/rank_factor)
@@ -134,7 +153,7 @@ def decompose_weights(model, low_rank_model, rank_factor):
 
             u_weight_sliced_shape, v_weight_sliced_shape = u_weight_sliced.size(), v_weight_sliced.size()
 
-            print(u_weight_sliced_shape)
+            # print(u_weight_sliced_shape)
             model_weight_v = u_weight_sliced.view(u_weight_sliced_shape[0],
                                                   u_weight_sliced_shape[1], 1, 1)
             
@@ -233,7 +252,7 @@ for epoch in range(start_epoch, start_epoch+20):
         print("!!!!! Warm-up epoch: {}".format(epoch))
         train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
         test(epoch, model=net_vanilla)
-        scheduler_vanilla.step()
+        # scheduler_vanilla.step()
     elif epoch == 5:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
