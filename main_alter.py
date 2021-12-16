@@ -106,10 +106,13 @@ criterion = nn.CrossEntropyLoss()
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
 #                         milestones=[150, 250], gamma=0.1)
 
-# optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=args.lr,
-#                       momentum=0.9, weight_decay=1e-4)
+optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=args.lr,
+                      momentum=0.9, weight_decay=5e-4)
+scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.1, steps_per_epoch=len(trainloader), epochs=30, 
+                                                        div_factor=1, final_div_factor=200)
 
-optimizer_vanilla = torch.optim.SGD(model.parameters(), lr=one_cycle(hp_max=0.1, epochs=30), momentum=0.9, weight_decay=5e-4, nesterov=True)
+
+    # def one_cycle(hp_max=0.1, epochs=10, hp_init=0.0, hp_final=0.005, extra=5):
 
 # scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
 #                         milestones=[150, 250], gamma=0.1)
@@ -252,7 +255,7 @@ for epoch in range(start_epoch, start_epoch+20):
         print("!!!!! Warm-up epoch: {}".format(epoch))
         train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
         test(epoch, model=net_vanilla)
-        # scheduler_vanilla.step()
+        scheduler_vanilla.step()
     elif epoch == 5:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
