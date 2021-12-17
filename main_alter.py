@@ -106,15 +106,15 @@ criterion = nn.CrossEntropyLoss()
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
 #                         milestones=[150, 250], gamma=0.1)
 
-optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=args.lr,
+optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=0.05,
                       momentum=0.9, weight_decay=5e-4)
-scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.1, steps_per_epoch=len(trainloader), epochs=30)
+# scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.05, steps_per_epoch=len(trainloader), epochs=30)
 
 
     # def one_cycle(hp_max=0.1, epochs=10, hp_init=0.0, hp_final=0.005, extra=5):
 
-# scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
-#                         milestones=[150, 250], gamma=0.1)
+scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
+                        milestones=[20, 30], gamma=0.1)
 
 
 #def get_approx(u_weight, v_weight_t):
@@ -245,8 +245,8 @@ def test(epoch, model):
         torch.save(state, './checkpoint/ckpt.pth')
         best_acc = acc
 
-TOTAL = 30
-WARM_UP = 30
+TOTAL = 50
+WARM_UP = 50
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
