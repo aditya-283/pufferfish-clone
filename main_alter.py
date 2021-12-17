@@ -259,7 +259,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
     elif epoch == WARM_UP:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
-            low_rank_model=net, rank_factor=4)
+            low_rank_model=net, rank_factor=8)
         test(epoch, model=net)
 
         optimizer = optim.SGD(net.parameters(), lr=0.05,
