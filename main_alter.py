@@ -108,8 +108,7 @@ criterion = nn.CrossEntropyLoss()
 
 optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=args.lr,
                       momentum=0.9, weight_decay=5e-4)
-scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.1, steps_per_epoch=len(trainloader), epochs=30, 
-                                                        div_factor=1, final_div_factor=200)
+scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.1, steps_per_epoch=len(trainloader), epochs=30)
 
 
     # def one_cycle(hp_max=0.1, epochs=10, hp_init=0.0, hp_final=0.005, extra=5):
