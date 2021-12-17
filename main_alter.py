@@ -262,10 +262,10 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
             low_rank_model=net, rank_factor=4)
         test(epoch, model=net)
 
-        optimizer = optim.SGD(net.parameters(), lr=args.lr,
-                              momentum=0.9, weight_decay=1e-4)
+        optimizer = optim.SGD(net.parameters(), lr=0.05,
+                              momentum=0.9, weight_decay=5e-4)
         scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
-                                milestones=[150-20, 250-20], gamma=0.1)
+                                milestones=[1, 10], gamma=0.1)
 
         # freeze the residual layers
         for param_index, (param_name, param) in enumerate(net.named_parameters()):
