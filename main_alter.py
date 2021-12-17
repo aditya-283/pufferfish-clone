@@ -51,19 +51,19 @@ transform_test = transforms.Compose([
     transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
 ])
 
-trainset = datasets.CIFAR10(
+trainset = datasets.CIFAR100(
     root='./data', train=True, download=True, transform=transform_train)
 trainloader = torch.utils.data.DataLoader(
     trainset, batch_size=256, shuffle=True, num_workers=4,
                 pin_memory=True)
-testset = datasets.CIFAR10(
+testset = datasets.CIFAR100(
     root='./data', train=False, download=True, transform=transform_test)
 testloader = torch.utils.data.DataLoader(
     testset, batch_size=256, shuffle=False, num_workers=4,
     pin_memory=True)
 
-classes = ('plane', 'car', 'bird', 'cat', 'deer',
-           'dog', 'frog', 'horse', 'ship', 'truck')
+# classes = ('plane', 'car', 'bird', 'cat', 'deer',
+#            'dog', 'frog', 'horse', 'ship', 'truck')
 
 # Model
 print('==> Building model..')
@@ -245,8 +245,8 @@ def test(epoch, model):
         torch.save(state, './checkpoint/ckpt.pth')
         best_acc = acc
 
-TOTAL = 50
-WARM_UP = 10
+TOTAL = 30
+WARM_UP = 30
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
@@ -259,7 +259,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
     elif epoch == WARM_UP:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
-            low_rank_model=net, rank_factor=8)
+            low_rank_model=net, rank_factor=4)
         test(epoch, model=net)
 
         optimizer = optim.SGD(net.parameters(), lr=0.05,
