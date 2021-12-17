@@ -246,7 +246,7 @@ def test(epoch, model):
         best_acc = acc
 
 TOTAL = 30
-WARM_UP = 30
+WARM_UP = 10
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
