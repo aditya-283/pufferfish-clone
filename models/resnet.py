@@ -1636,19 +1636,22 @@ class LowRankResNetConv1x1(nn.Module):
         if stride != 1 or self.inplanes != planes * block.expansion:
             ###############################################################################
             # TODO(hwang): check performance of these changes
+
+            # TODO(aditya) : fix and uncomment?
+            
             #if block is LowRankBottleneckConv1x1 or block is LowRankBasicBlockConv1x1:
-            if block is LowRankBottleneckConv1x1:
-                downsample = nn.Sequential(
-                    #conv1x1(self.inplanes, planes * block.expansion, stride),
-                    conv1x1(self.inplanes, int(planes/rank_factor), stride=1),
-                    conv1x1(int(planes/rank_factor), planes * block.expansion, stride),
-                    norm_layer(planes * block.expansion),
-                )
-            else:
-                downsample = nn.Sequential(
-                    conv1x1(self.inplanes, planes * block.expansion, stride),
-                    norm_layer(planes * block.expansion),
-                )
+            # if block is LowRankBottleneckConv1x1:
+            #     downsample = nn.Sequential(
+            #         #conv1x1(self.inplanes, planes * block.expansion, stride),
+            #         conv1x1(self.inplanes, int(planes/rank_factor), stride=1),
+            #         conv1x1(int(planes/rank_factor), planes * block.expansion, stride),
+            #         norm_layer(planes * block.expansion),
+            #     )
+            # else:
+            downsample = nn.Sequential(
+                conv1x1(self.inplanes, planes * block.expansion, stride),
+                norm_layer(planes * block.expansion),
+            )
 
             ####
             #downsample = nn.Sequential(
