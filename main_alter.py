@@ -70,9 +70,11 @@ testloader = torch.utils.data.DataLoader(
 # classes = ('plane', 'car', 'bird', 'cat', 'deer',
 #            'dog', 'frog', 'horse', 'ship', 'truck')
 
+
+RANK_FACTOR = 8
 # Model
 print('==> Building model..')
-net = lowrank_resnet50_conv1x1()
+net = lowrank_resnet50_conv1x1(rank_factor=RANK_FACTOR)
 net = net.to(device)
 
 net_vanilla = models.resnet50(pretrained=True)
@@ -264,7 +266,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
     elif epoch == WARM_UP:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
-            low_rank_model=net, rank_factor=8)
+            low_rank_model=net, rank_factor=RANK_FACTOR)
         test(epoch, model=net)
 
         optimizer = optim.SGD(net.parameters(), lr=0.05,
