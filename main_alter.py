@@ -135,7 +135,7 @@ def decompose_weights(model, low_rank_model, rank_factor):
     reconstructed_aggregator = []
     
     for item_index, (param_name, param) in enumerate(model.state_dict().items()):
-        if len(param.size()) == 4 and item_index not in range(0, 2) and 'shortcut' not in param_name and 'downsample' not in param_name:
+        if len(param.size()) == 4 and item_index not in range(0, 2) and 'shortcut' not in param_name:
             # resize --> svd --> two layer
             # print(param.size())
             param_reshaped = param.view(param.size()[0], -1)
