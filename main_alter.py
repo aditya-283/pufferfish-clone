@@ -74,10 +74,12 @@ testloader = torch.utils.data.DataLoader(
 RANK_FACTOR = 8
 # Model
 print('==> Building model..')
-net = lowrank_resnet50_conv1x1(rank_factor=RANK_FACTOR)
+# net = lowrank_resnet50_conv1x1(rank_factor=RANK_FACTOR)
+net = LowRankResNet50()
 net = net.to(device)
 
-net_vanilla = models.resnet50(pretrained=True)
+# net_vanilla = models.resnet50(pretrained=True)
+net_vanilla = ResNet50()
 net_vanilla = net_vanilla.to(device)
 cudnn.benchmark = True
 

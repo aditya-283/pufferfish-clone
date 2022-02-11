@@ -308,12 +308,19 @@ class LowRankBottleneckConv1x1(nn.Module):
         super(LowRankBottleneckConv1x1, self).__init__()
         self.conv1_u = nn.Conv2d(in_planes, int(planes/CONST_RANK_DENOMINATOR), kernel_size=1, bias=False)
         self.conv1_v = conv1x1(int(planes/CONST_RANK_DENOMINATOR), planes)
+        self.conv1_res = conv1x1(in_planes, planes)
+
         self.bn1 = nn.BatchNorm2d(planes)
         self.conv2_u = nn.Conv2d(planes, int(planes/CONST_RANK_DENOMINATOR), kernel_size=3, stride=stride, padding=1, bias=False)
         self.conv2_v = conv1x1(int(planes/CONST_RANK_DENOMINATOR), planes)
+        self.conv2_res = nn.Conv2d(planes, planes, kernel_size=3, stride=stride, padding=1, bias=False)
+
         self.bn2 = nn.BatchNorm2d(planes)
         self.conv3_u = nn.Conv2d(planes, int(self.expansion*planes/CONST_RANK_DENOMINATOR), kernel_size=1, bias=False)
         self.conv3_v = conv1x1(int(self.expansion*planes/CONST_RANK_DENOMINATOR), self.expansion*planes)
+        self.conv3_res = nn.Conv2d(planes, self.expansion*planes, kernel_size=1, bias=False)
+
+
         self.bn3 = nn.BatchNorm2d(self.expansion*planes)
 
         self.shortcut = nn.Sequential()
@@ -324,9 +331,9 @@ class LowRankBottleneckConv1x1(nn.Module):
             )
 
     def forward(self, x):
-        out = F.relu(self.bn1(self.conv1_v(self.conv1_u(x))))
-        out = F.relu(self.bn2(self.conv2_v(self.conv2_u(out))))
-        out = self.bn3(self.conv3_v(self.conv3_u(out)))
+        out = F.relu(self.bn1(self.conv1_v(self.conv1_u(x))  + self.conv1_res(x)))
+        out = F.relu(self.bn2(self.conv2_v(self.conv2_u(out)) + self.conv2_res(out)))
+        out = self.bn3(self.conv3_v(self.conv3_u(out))+ self.conv3_res(out))
         out += self.shortcut(x)
         out = F.relu(out)
         return out
