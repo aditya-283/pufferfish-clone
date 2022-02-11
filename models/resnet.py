@@ -398,14 +398,18 @@ class LowRankBottleneck(nn.Module):
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1_u = conv1x1(inplanes, int(width/CONST_RANK_DENOMINATOR))
         self.conv1_v = nn.Linear(int(width/CONST_RANK_DENOMINATOR), width)
+
         self.bn1 = norm_layer(width)
 
         self.conv2_u = conv3x3(width, int(width/CONST_RANK_DENOMINATOR), stride, groups, dilation)
         self.conv2_v = nn.Linear(int(width/CONST_RANK_DENOMINATOR), width)
+
+
         self.bn2 = norm_layer(width)
         
         self.conv3_u = conv1x1(width, int(planes * self.expansion/CONST_RANK_DENOMINATOR))
         self.conv3_v = nn.Linear(int(planes * self.expansion/CONST_RANK_DENOMINATOR), planes * self.expansion)
+
         self.bn3 = norm_layer(planes * self.expansion)
         
         self.relu = nn.ReLU(inplace=True)
@@ -465,15 +469,19 @@ class LowRankBottleneckConv1x1(nn.Module):
         # Both self.conv2 and self.downsample layers downsample the input when stride != 1
         self.conv1_u = conv1x1(inplanes, int(width/rank_factor))
         self.conv1_v = conv1x1(int(width/rank_factor), width)
+        self.conv1_res = conv1x1(inplanes, width)
+
         self.bn1 = norm_layer(width)
 
         self.conv2_u = conv3x3(width, int(width/rank_factor), stride, groups, dilation)
         self.conv2_v = conv1x1(int(width/rank_factor), width)
+        self.conv2_res = conv3x3(width, width, stride, groups, dilation)
         self.bn2 = norm_layer(width)
         
         # TODO(hwang): to check if this works
         self.conv3_u = conv1x1(width, int(width/rank_factor))
         self.conv3_v = conv1x1(int(width/rank_factor), planes * self.expansion)
+        self.conv3_res = conv1x1(width, planes * self.expansion)
         #self.conv3 = conv1x1(width, int(planes * self.expansion))
         self.bn3 = norm_layer(planes * self.expansion)
         
@@ -514,21 +522,16 @@ class LowRankBottleneckConv1x1(nn.Module):
         identity = x
 
         ###################### old version #########################
-        out = self.conv1_u(x)
-        out = self.conv1_v(out)
+        out = self.conv1_v(self.conv1_u(x)) + self.conv1_res(x)
         out = self.bn1(out)
         out = self.relu(out)
 
-        out = self.conv2_u(out)
-        out = self.conv2_v(out)
+        out = self.conv2_v(self.conv2_u(out)) + self.conv2_res(out)
         out = self.bn2(out)
         out = self.relu(out)
 
         ## TODO(hwang): check performance of this
-        out = self.conv3_u(out)
-        out = self.conv3_v(out)
-        
-        #out = self.conv3(out)
+        out = self.conv3_v(self.conv3_u(out)) + self.conv3_res(out)
         out = self.bn3(out)
         ############################################################
 

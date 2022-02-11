@@ -8,12 +8,15 @@ from torchvision import datasets, transforms
 from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
 
+import torchvision.models as models
+
 import logging
 import time
 import random
 import numpy as np
 import os
 
+from models.resnet import resnet50, lowrank_resnet50_conv1x1
 from vgg import *
 from lowrank_vgg import LowRankVGG, FullRankVGG, VanillaVGG19, LowRankVGG19, LRVGG19Residule
 from resnet_cifar10 import *
@@ -43,12 +46,14 @@ transform_train = transforms.Compose([
     transforms.RandomCrop(32, padding=4),
     transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
 ])
 
 transform_test = transforms.Compose([
     transforms.ToTensor(),
-    transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
+    transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225]),
 ])
 
 trainset = datasets.CIFAR100(
@@ -67,14 +72,14 @@ testloader = torch.utils.data.DataLoader(
 
 # Model
 print('==> Building model..')
-net = ResNet18LRA()
+net = lowrank_resnet50_conv1x1()
 net = net.to(device)
 
-net_vanilla = ResNet18()
+net_vanilla = models.resnet50(pretrained=True)
 net_vanilla = net_vanilla.to(device)
 cudnn.benchmark = True
 
-print("@@@ Resnet18 : {}".format(net_vanilla))
+print("@@@ Resnet50 : {}".format(net_vanilla))
 # print("@@@ Vanilla VGG19 : {}".format(net_vanilla))
 
 if args.resume:
