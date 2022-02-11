@@ -133,7 +133,7 @@ def decompose_weights(model, low_rank_model, rank_factor):
     reconstructed_aggregator = []
     
     for item_index, (param_name, param) in enumerate(model.state_dict().items()):
-        if len(param.size()) == 4 and item_index not in range(0, 1) and 'shortcut' not in param_name:
+        if len(param.size()) == 4 and 'shortcut' not in param_name:
             # resize --> svd --> two layer
             # print(param.size())
             param_reshaped = param.view(param.size()[0], -1)
@@ -251,7 +251,7 @@ def test(epoch, model):
         best_acc = acc
 
 TOTAL = 30
-WARM_UP = 10
+WARM_UP = 0
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
