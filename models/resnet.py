@@ -36,7 +36,7 @@ model_urls = {
 # for now we use this as a constant for all layers
 # if `CONST_RANK_DENOMINATOR` = r, it means we use a rank equals to n/r
 # where n is the original dimension
-CONST_RANK_DENOMINATOR=4
+CONST_RANK_DENOMINATOR=8
 
 
 def conv3x3(in_planes, out_planes, stride=1, groups=1, dilation=1):
