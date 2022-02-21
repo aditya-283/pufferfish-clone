@@ -93,7 +93,7 @@ print(net_vanilla)
 
 # cudnn.benchmark = True
 
-print("@@@ Resnet50 : {}".format(net_vanilla))
+print("!!!! VANILLA Resnet50 : {}".format(net_vanilla))
 # print("@@@ Vanilla VGG19 : {}".format(net_vanilla))
 
 if args.resume:
