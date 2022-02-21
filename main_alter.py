@@ -276,7 +276,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
             if "_res" in param_name:
                 param.requires_grad = False
 
-        transfer.fit_epoch(net, transfer.trainloader, criterion, optimizer_vanilla) # why different?
+        transfer.fit_epoch(net, transfer.trainloader, criterion, optimizer) # why different?
         transfer.validate_epoch(net, transfer.testloader, criterion)
         # train(epoch, model=net, optimizer=optimizer)
         # test(epoch, model=net)
@@ -303,6 +303,6 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
         for group in optimizer.param_groups:
             print("@@@@@ Epoch: {}, Lr: {}".format(epoch, group['lr']))
 
-        train(epoch, model=net, optimizer=optimizer)
-        test(epoch, model=net)
+        transfer.fit_epoch(net, transfer.trainloader, criterion, optimizer) # why different?
+        transfer.validate_epoch(net, transfer.testloader, criterion)
         # scheduler.step()
