@@ -262,7 +262,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
             low_rank_model=net, rank_factor=RANK_FACTOR)
-        test(epoch, model=net)
+        transfer.validate_epoch(net, transfer.testloader, criterion)
 
         optimizer = optim.SGD(net.parameters(), lr=0.05,
                               momentum=0.9, weight_decay=5e-4)
@@ -276,8 +276,10 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
             if "_res" in param_name:
                 param.requires_grad = False
 
-        train(epoch, model=net, optimizer=optimizer)
-        test(epoch, model=net)
+        transfer.fit_epoch(net, transfer.trainloader, criterion, optimizer_vanilla) # why different?
+        transfer.validate_epoch(net, transfer.testloader, criterion)
+        # train(epoch, model=net, optimizer=optimizer)
+        # test(epoch, model=net)
         for group in optimizer.param_groups:
             print("@@@@@ Epoch: {}, Lr: {}".format(epoch, group['lr']))
         # scheduler.step()
