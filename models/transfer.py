@@ -19,6 +19,7 @@ import pickle
 import random
 import pretrainedmodels
 import torchvision
+from models.resnet import lowrank_resnet50_conv1x1
 
 
 from imutils import paths
@@ -53,13 +54,9 @@ class ResNet50(nn.Module):
         return l0
 
 class LowRankResNet50(nn.Module):
-    def __init__(self, pretrained):
+    def __init__(self):
         super(LowRankResNet50, self).__init__()
-        if pretrained is True:
-            self.model = pretrainedmodels.__dict__['resnet50'](pretrained='imagenet')
-        else:
-            self.model = pretrainedmodels.__dict__['resnet50'](pretrained=None)
-        
+        self.model = lowrank_resnet50_conv1x1(rank_factor=8)        
         self.l0 = nn.Linear(2048, 101)
         self.dropout = nn.Dropout2d(0.4)
 

@@ -76,7 +76,7 @@ transform_test = transforms.Compose([
 RANK_FACTOR = 8
 # Model
 print('==> Building model..')
-net = lowrank_resnet50_conv1x1(rank_factor=RANK_FACTOR, num_classes=100)
+net = transfer.LowRankResNet50()
 # net = LowRankResNet50()
 net = net.to(device)
 
@@ -108,18 +108,6 @@ if args.resume:
     start_epoch = checkpoint['epoch']
 
 
-def one_cycle(hp_max=0.1, epochs=10, hp_init=0.0, hp_final=0.005, extra=5):
-    def f(progress):
-        if progress < epochs / 2:
-            return 2 * hp_max * (1 - (epochs - progress) / epochs)
-        elif progress <= epochs:
-            return hp_final + 2 * (hp_max - hp_final) * (epochs - progress) / epochs
-        elif progress <= epochs + extra:
-            return hp_final * (extra - (progress - epochs)) / extra
-        else:
-            return hp_final / 10
-    
-    return f
 
 criterion = nn.CrossEntropyLoss()
 # optimizer = optim.SGD(net.parameters(), lr=args.lr,
@@ -258,7 +246,7 @@ def test(epoch, model):
         best_acc = acc
 
 TOTAL = 300
-WARM_UP = 50
+WARM_UP = 0
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
