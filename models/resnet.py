@@ -1671,6 +1671,19 @@ class LowRankResNetConv1x1(nn.Module):
 
         return nn.Sequential(*layers)
 
+    def features(self, input):
+        x = self.conv1(input)
+        x = self.bn1(x)
+        x = self.relu(x)
+        x = self.maxpool(x)
+
+        x = self.layer1(x)
+        x = self.layer2(x)
+        x = self.layer3(x)
+        x = self.layer4(x)
+        return x
+
+
     def _forward(self, x):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -1688,7 +1701,7 @@ class LowRankResNetConv1x1(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
 
-        # x = self.fc(x) #outside the model, check transfer.py
+        x = self.fc(x)
         #x = self.fc_u(x)
         #x = self.fc_v(x)        
         return x
