@@ -56,16 +56,18 @@ transform_test = transforms.Compose([
                                  std=[0.229, 0.224, 0.225]),
 ])
 
-trainset = datasets.CIFAR100(
-    root='./data', train=True, download=True, transform=transform_train)
-trainloader = torch.utils.data.DataLoader(
-    trainset, batch_size=256, shuffle=True, num_workers=4,
-                pin_memory=True)
-testset = datasets.CIFAR100(
-    root='./data', train=False, download=True, transform=transform_test)
-testloader = torch.utils.data.DataLoader(
-    testset, batch_size=256, shuffle=False, num_workers=4,
-    pin_memory=True)
+# trainset = datasets.CIFAR100(
+#     root='./data', train=True, download=True, transform=transform_train)
+# trainloader = torch.utils.data.DataLoader(
+#     trainset, batch_size=256, shuffle=True, num_workers=4,
+#                 pin_memory=True)
+# testset = datasets.CIFAR100(
+#     root='./data', train=False, download=True, transform=transform_test)
+# testloader = torch.utils.data.DataLoader(
+#     testset, batch_size=256, shuffle=False, num_workers=4,
+#     pin_memory=True)
+
+
 
 # classes = ('plane', 'car', 'bird', 'cat', 'deer',
 #            'dog', 'frog', 'horse', 'ship', 'truck')
@@ -203,7 +205,7 @@ def train(epoch, model, optimizer):
     train_loss = 0
     correct = 0
     total = 0
-    for batch_idx, (inputs, targets) in enumerate(trainloader):
+    for batch_idx, (inputs, targets) in enumerate(transfer.trainloader):
         inputs, targets = inputs.to(device), targets.to(device)
         optimizer.zero_grad()
         outputs = model(inputs)
@@ -218,7 +220,7 @@ def train(epoch, model, optimizer):
 
         if batch_idx % 50 == 0:
             logger.info("Train @ Epoch: {}, {}/{}, Loss: {:.3f}, Acc: {:.3f}".format(
-                epoch, batch_idx, len(trainloader), train_loss/(batch_idx+1), 100.*correct/total))
+                epoch, batch_idx, len(transfer.trainloader), train_loss/(batch_idx+1), 100.*correct/total))
 
 
 def test(epoch, model):
@@ -228,7 +230,7 @@ def test(epoch, model):
     correct = 0
     total = 0
     with torch.no_grad():
-        for batch_idx, (inputs, targets) in enumerate(testloader):
+        for batch_idx, (inputs, targets) in enumerate(transfer.testloader):
             inputs, targets = inputs.to(device), targets.to(device)
             outputs = model(inputs)
             loss = criterion(outputs, targets)
@@ -265,7 +267,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
         print("!!!!! Warm-up epoch: {}".format(epoch))
         train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
         test(epoch, model=net_vanilla)
-        scheduler_vanilla.step()
+        # scheduler_vanilla.step()
     elif epoch == WARM_UP:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
@@ -274,8 +276,8 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
 
         optimizer = optim.SGD(net.parameters(), lr=0.05,
                               momentum=0.9, weight_decay=5e-4)
-        scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
-                                milestones=[10, 15], gamma=0.1)
+        # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
+        #                         milestones=[10, 15], gamma=0.1)
 
         # freeze the residual layers
         for param_index, (param_name, param) in enumerate(net.named_parameters()):
@@ -288,7 +290,7 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
         test(epoch, model=net)
         for group in optimizer.param_groups:
             print("@@@@@ Epoch: {}, Lr: {}".format(epoch, group['lr']))
-        scheduler.step()
+        # scheduler.step()
     else:
         if epoch % 5 == 0:
             # un-freeze the residual layers
@@ -311,4 +313,4 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
 
         train(epoch, model=net, optimizer=optimizer)
         test(epoch, model=net)
-        scheduler.step()
+        # scheduler.step()
