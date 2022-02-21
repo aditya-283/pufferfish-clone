@@ -1688,7 +1688,7 @@ class LowRankResNetConv1x1(nn.Module):
         x = self.avgpool(x)
         x = torch.flatten(x, 1)
 
-        x = self.fc(x)
+        # x = self.fc(x) #outside the model, check transfer.py
         #x = self.fc_u(x)
         #x = self.fc_v(x)        
         return x

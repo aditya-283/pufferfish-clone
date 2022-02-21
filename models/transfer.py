@@ -63,7 +63,7 @@ class LowRankResNet50(nn.Module):
     def forward(self, x):
         # get the batch size only, ignore (c, h, w)
         batch, _, _, _ = x.shape
-        x = self.model.features(x)
+        x = self.model(x)
         x = F.adaptive_avg_pool2d(x, 1).reshape(batch, -1)
         x = self.dropout(x)
         l0 = self.l0(x)
