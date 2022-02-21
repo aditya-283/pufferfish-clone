@@ -7,7 +7,7 @@ import torch.optim as optim
 from torchvision import datasets, transforms
 from torch.autograd import Variable
 import torch.backends.cudnn as cudnn
-
+import transfer
 import torchvision.models as models
 
 import logging
@@ -74,14 +74,24 @@ testloader = torch.utils.data.DataLoader(
 RANK_FACTOR = 8
 # Model
 print('==> Building model..')
-net = lowrank_resnet50_conv1x1(rank_factor=RANK_FACTOR)
+net = lowrank_resnet50_conv1x1(rank_factor=RANK_FACTOR, num_classes=100)
 # net = LowRankResNet50()
 net = net.to(device)
 
-net_vanilla = models.resnet50(pretrained=True)
-# net_vanilla = ResNet50()
+print("HERE IS LOWRANKNET")
+
+net_vanilla = models.resnet50()
 net_vanilla = net_vanilla.to(device)
-cudnn.benchmark = True
+net_vanilla.eval()
+print("HERE IS NET VANILLA")
+print(net_vanilla)
+
+# net_vanilla = transfer.ResNet50(pretrained=True)
+# # net_vanilla.load_state_dict(torch.load('/content/gdrive/MyDrive/ResNet50.pth'))
+# net_vanilla = net_vanilla.to(device)
+# net_vanilla.eval()
+
+# cudnn.benchmark = True
 
 print("@@@ Resnet50 : {}".format(net_vanilla))
 # print("@@@ Vanilla VGG19 : {}".format(net_vanilla))
@@ -115,22 +125,13 @@ criterion = nn.CrossEntropyLoss()
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
 #                         milestones=[150, 250], gamma=0.1)
 
-optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=0.05,
-                      momentum=0.9, weight_decay=5e-4)
+optimizer_vanilla = optim.Adam(model.parameters(), lr=1e-4)
+# optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=0.05,
+#                       momentum=0.9, weight_decay=5e-4)
 # scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.05, steps_per_epoch=len(trainloader), epochs=30)
 
-
-    # def one_cycle(hp_max=0.1, epochs=10, hp_init=0.0, hp_final=0.005, extra=5):
-
-scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
-                        milestones=[20, 30], gamma=0.1)
-
-
-#def get_approx(u_weight, v_weight_t):
-
-
-
-
+# scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
+#                         milestones=[20, 30], gamma=0.1)
 
 def decompose_weights(model, low_rank_model, rank_factor):
     # SVD version
