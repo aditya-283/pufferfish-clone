@@ -82,16 +82,16 @@ net = net.to(device)
 
 print("HERE IS LOWRANKNET")
 
-net_vanilla = models.resnet50()
-net_vanilla = net_vanilla.to(device)
-net_vanilla.eval()
-print("HERE IS NET VANILLA")
-print(net_vanilla)
-
-# net_vanilla = transfer.ResNet50(pretrained=True)
-# # net_vanilla.load_state_dict(torch.load('/content/gdrive/MyDrive/ResNet50.pth'))
+# net_vanilla = models.resnet50()
 # net_vanilla = net_vanilla.to(device)
 # net_vanilla.eval()
+# print("HERE IS NET VANILLA")
+# print(net_vanilla)
+
+net_vanilla = transfer.ResNet50(pretrained=True)
+# # net_vanilla.load_state_dict(torch.load('/content/gdrive/MyDrive/ResNet50.pth'))
+net_vanilla = net_vanilla.to(device)
+net_vanilla.eval()
 
 # cudnn.benchmark = True
 
@@ -265,8 +265,10 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
     #            param_index, param_name, param.size()))
     if epoch in range(WARM_UP):
         print("!!!!! Warm-up epoch: {}".format(epoch))
-        train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
-        test(epoch, model=net_vanilla)
+        transfer.fit_epoch(net_vanilla, transfer.trainloader, criterion, optimizer_vanilla)
+        transfer.validate_epoch(net_vanilla, transfer.testloader, criterion)
+        # train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
+        # test(epoch, model=net_vanilla)
         # scheduler_vanilla.step()
     elif epoch == WARM_UP:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))

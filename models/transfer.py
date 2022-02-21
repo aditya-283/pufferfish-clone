@@ -94,6 +94,71 @@ class ImageDataset(Dataset):
             return data
  
 
+
+def validate_epoch(model, dataloader, criterion):
+    print('Validating')
+    model.eval()
+    val_running_loss = 0.0
+    val_running_correct = 0
+    with torch.no_grad():
+        for i, data in tqdm(enumerate(dataloader), total=int(len(val_data)/dataloader.batch_size)):
+            data, target = data[0].to('cuda'), data[1].to('cuda')
+            outputs = model(data)
+            loss = criterion(outputs, torch.max(target, 1)[1])
+            
+            val_running_loss += loss.item()
+            _, preds = torch.max(outputs.data, 1)
+            val_running_correct += (preds == torch.max(target, 1)[1]).sum().item()
+        
+        val_loss = val_running_loss/len(dataloader.dataset)
+        val_accuracy = 100. * val_running_correct/len(dataloader.dataset)
+        print(f'Val Loss: {val_loss:.4f}, Val Acc: {val_accuracy:.2f}')
+        
+        return val_loss, val_accuracy
+
+# training function
+def fit_epoch(model, dataloader, criterion, optimizer):
+    print('Training')
+    model.train()
+    train_running_loss = 0.0
+    train_running_correct = 0
+    for i, data in tqdm(enumerate(dataloader), total=int(len(train_data)/dataloader.batch_size)):
+        data, target = data[0].to('cuda'), data[1].to('cuda')
+        optimizer.zero_grad()
+        outputs = model(data)
+        # print(outputs)
+        # print(torch.max(target, 1)[1])
+        loss = criterion(outputs, torch.max(target, 1)[1])
+        train_running_loss += loss.item()
+        _, preds = torch.max(outputs.data, 1)
+        train_running_correct += (preds == torch.max(target, 1)[1]).sum().item()
+        loss.backward()
+        optimizer.step()
+        
+    train_loss = train_running_loss/len(dataloader.dataset)
+    train_accuracy = 100. * train_running_correct/len(dataloader.dataset)
+    
+    print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_accuracy:.2f}")
+    
+    return train_loss, train_accuracy
+
+
+def training_loop(model, epochs=10):
+  train_loss , train_accuracy = [], []
+  val_loss , val_accuracy = [], []
+  start = time.time()
+  for epoch in range(epochs):
+      print(f"Epoch {epoch+1} of {epochs}")
+      train_epoch_loss, train_epoch_accuracy = fit_epoch(model, trainloader)
+      val_epoch_loss, val_epoch_accuracy = validate_epoch(model, valloader)
+      train_loss.append(train_epoch_loss)
+      train_accuracy.append(train_epoch_accuracy)
+      val_loss.append(val_epoch_loss)
+      val_accuracy.append(val_epoch_accuracy)
+  end = time.time()
+
+  print((end-start)/60, 'minutes')
+
 data = []
 labels = []
 label_names = []
