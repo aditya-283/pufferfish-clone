@@ -115,9 +115,9 @@ criterion = nn.CrossEntropyLoss()
 # scheduler = torch.optim.lr_scheduler.MultiStepLR(optimizer, 
 #                         milestones=[150, 250], gamma=0.1)
 
-optimizer_vanilla = optim.Adam(net_vanilla.parameters(), lr=1e-4)
-# optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=0.05,
-#                       momentum=0.9, weight_decay=5e-4)
+# optimizer_vanilla = optim.Adam(net_vanilla.parameters(), lr=1e-4)
+optimizer_vanilla = optim.SGD(net_vanilla.parameters(), lr=0.05,
+                      momentum=0.9, weight_decay=5e-4)
 # scheduler_vanilla = torch.optim.lr_scheduler.OneCycleLR(optimizer_vanilla, max_lr=0.05, steps_per_epoch=len(trainloader), epochs=30)
 
 # scheduler_vanilla = torch.optim.lr_scheduler.MultiStepLR(optimizer_vanilla, 
@@ -247,6 +247,7 @@ def test(epoch, model):
 
 TOTAL = 200
 WARM_UP = 200
+scheduler = optim.ReduceLROnPlateau(optimizer_vanilla, 'min')
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
@@ -254,10 +255,10 @@ for epoch in range(start_epoch, start_epoch+TOTAL):
     if epoch in range(WARM_UP):
         print("!!!!! Warm-up epoch: {}".format(epoch))
         transfer.fit_epoch(net_vanilla, transfer.trainloader, criterion, optimizer_vanilla)
-        transfer.validate_epoch(net_vanilla, transfer.testloader, criterion)
+        val_loss, _ = transfer.validate_epoch(net_vanilla, transfer.testloader, criterion)
         # train(epoch, model=net_vanilla, optimizer=optimizer_vanilla)
         # test(epoch, model=net_vanilla)
-        # scheduler_vanilla.step()
+        scheduler.step(val_loss)
     elif epoch == WARM_UP:
         print("!!!!! Switching to low rank model, epoch: {}".format(epoch))
         net = decompose_weights(model=net_vanilla, 
