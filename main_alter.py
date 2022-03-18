@@ -88,7 +88,7 @@ print("HERE IS LOWRANKNET")
 # print("HERE IS NET VANILLA")
 # print(net_vanilla)
 
-net_vanilla = transfer.ResNet50(pretrained=True)
+net_vanilla = transfer.ResNet50(pretrained=False)
 # # net_vanilla.load_state_dict(torch.load('/content/gdrive/MyDrive/ResNet50.pth'))
 net_vanilla = net_vanilla.to(device)
 net_vanilla.eval()
@@ -245,8 +245,8 @@ def test(epoch, model):
         torch.save(state, './checkpoint/ckpt.pth')
         best_acc = acc
 
-TOTAL = 300
-WARM_UP = 0
+TOTAL = 200
+WARM_UP = 200
 for epoch in range(start_epoch, start_epoch+TOTAL):
     #for param_index, (param_name, param) in enumerate(net.named_parameters()):
     #    print("!!!! Param idx: {}, param name: {}, param size: {}".format(
